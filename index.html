@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ne">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<title>Sayurika Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Mukta:wght@400;500;600&display=swap">
+<style>
+/* Layout: phone-width app column; sticky header with role switch, scrolling view, fixed bottom tab bar */
+:root{--bg:#f1f4f9;--panel:#fff;--ink:#1c2a4a;--muted:#5d6b85;--line:#dfe6f0;--gold:#e89b0c;--gold-ink:#3a2600;--ok:#1f8a5b;--no:#c0392b;--pink:#d6336c;--soft:#fde8f0;--navy:#1c2a4a;--on-navy:#fff;
+--display:"Baloo 2","Mukta",system-ui,sans-serif;--body:"Mukta",system-ui,"Hiragino Sans","Noto Sans JP",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1727;--panel:#1b2740;--ink:#e9eef8;--muted:#9fadc6;--line:#2f3d5c;--gold:#f2b032;--gold-ink:#2b1c00;--ok:#4cc38a;--no:#f0766a;--pink:#f06595;--soft:#3a2238;--navy:#27365a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1727;--panel:#1b2740;--ink:#e9eef8;--muted:#9fadc6;--line:#2f3d5c;--gold:#f2b032;--gold-ink:#2b1c00;--ok:#4cc38a;--no:#f0766a;--pink:#f06595;--soft:#3a2238;--navy:#27365a;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 var(--body)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation;transition:transform .12s,background .2s,color .2s,opacity .2s}
+button:active{transform:scale(.95)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+.app{max-width:440px;margin:0 auto;min-height:100vh;padding:0 16px 104px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0 10px}
+.brand{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+h1{font:700 26px/1 var(--display);margin:0;color:var(--pink)}
+h2{font:700 17px/1.2 var(--display);margin:0 0 6px}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:none;color:var(--muted);font-weight:600;font-size:14px;padding:6px 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:6px}
+.seg button[aria-pressed="true"]{background:var(--navy);color:var(--on-navy)}
+.who{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.who b{font:700 19px var(--display)}
+.users{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.users .btn{flex-direction:column;min-height:120px;white-space:normal;font-size:16px}
+.dots{display:flex;gap:12px;justify-content:center;margin:14px 0}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--muted)}
+.dots i.on{background:var(--pink);border-color:var(--pink)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.keys .btn{min-height:52px;font-size:20px}
+#view.in>*{animation:up .32s both}
+#view.in>*:nth-child(2){animation-delay:.05s}#view.in>*:nth-child(3){animation-delay:.1s}#view.in>*:nth-child(n+4){animation-delay:.15s}
+@keyframes up{from{opacity:0;transform:translateY(10px)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.hero{border-radius:20px;padding:16px;margin-bottom:12px;color:#fff;background:linear-gradient(135deg,#d6336c,#f08c2e)}
+.hero.d{background:linear-gradient(135deg,#1c2a4a,#3b5bdb)}
+.hero small{font-size:14px;opacity:.9}
+.big{font:700 44px/1.1 var(--display)}.big em{font:500 16px var(--body);opacity:.9}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chips span{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+.bar{height:8px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:8px}
+.hero .bar{background:rgba(255,255,255,.25)}
+.bar i{display:block;height:100%;border-radius:9px;background:var(--gold);transition:width .5s}
+.hero .bar i{background:#fff}
+.clocks{display:flex;gap:10px;margin-top:10px}
+.clocks div{flex:1;background:rgba(255,255,255,.14);border-radius:12px;padding:8px 10px}
+.clocks b{display:block;font:700 22px/1.1 var(--display)}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.grow{flex:1;min-width:0}
+.grow small,.muted{display:block;color:var(--muted);font-size:13px}
+.ico{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--pink)}
+.coin{font:700 14px var(--display);color:var(--gold)}
+.btn{border:0;border-radius:12px;min-height:40px;padding:8px 14px;font-weight:600;font-size:14px;background:var(--gold);color:var(--gold-ink);white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.pk{background:var(--pink);color:#fff}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink)}
+.btn.no{background:none;border:1px solid var(--no);color:var(--no)}
+.btn.sq{padding:8px;width:40px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.wide{width:100%}
+.pill{font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid currentColor;white-space:nowrap;color:var(--muted)}
+.pill.ok{color:var(--ok)}.pill.re{color:var(--no)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.places{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.places .btn{flex-direction:column;padding:12px 4px;min-height:72px}
+.thumb{flex:none;width:52px;height:52px;border-radius:12px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#7aa7ff,#b197fc)}
+.thread{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.bub{max-width:82%;padding:8px 12px;border-radius:16px;background:var(--panel);border:1px solid var(--line);align-self:flex-start;animation:up .3s both}
+.bub.me{align-self:flex-end;background:var(--pink);border-color:var(--pink);color:#fff}
+.bub small{display:block;font-size:11.5px;opacity:.75}
+.quick{display:flex;flex-direction:column;gap:6px}
+.quick .btn{justify-content:flex-start;white-space:normal;text-align:left}
+.form{display:flex;gap:6px;margin-top:8px}
+input{flex:1;min-width:0;min-height:40px;border:1px solid var(--line);border-radius:12px;padding:6px 10px;background:var(--bg)}
+input.n{flex:none;width:64px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:56px;margin-top:8px}
+.bars i{flex:1;border-radius:6px 6px 2px 2px;background:var(--line);min-height:4px;animation:grow .5s both;transform-origin:bottom}
+.bars i:last-child{background:var(--pink)}
+@keyframes grow{from{transform:scaleY(0)}}
+nav{position:fixed;z-index:6;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;display:flex;background:var(--panel);border-top:1px solid var(--line);padding:6px 8px;padding-bottom:max(8px,env(safe-area-inset-bottom,0px))}
+nav button{flex:1;border:0;background:none;color:var(--muted);font-size:12.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px;border-radius:12px;position:relative}
+nav button[aria-pressed="true"]{color:var(--pink);background:var(--soft)}
+nav b{position:absolute;top:0;left:54%;min-width:18px;height:18px;border-radius:9px;background:var(--no);color:#fff;font-size:11px;line-height:18px;padding:0 4px}
+.veil{position:fixed;inset:0;z-index:8;background:rgba(10,15,30,.5);display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+.sheet{width:100%;max-width:440px;background:var(--panel);border-radius:22px 22px 0 0;padding:18px 16px;padding-bottom:max(18px,env(safe-area-inset-bottom,0px));animation:rise .28s cubic-bezier(.2,.9,.3,1.1)}
+.shot{height:120px;border:2px dashed var(--line);border-radius:16px;display:grid;place-items:center;color:var(--muted);margin:10px 0;width:100%;background:none}
+.shot.on{border-style:solid;border-color:var(--ok);color:#fff;background:linear-gradient(135deg,#7aa7ff,#b197fc)}
+@keyframes fade{from{opacity:0}}
+@keyframes rise{from{transform:translateY(100%)}}
+#toast{position:fixed;z-index:9;left:50%;bottom:96px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:.25s;max-width:90%;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.fly{position:fixed;z-index:9;left:50%;top:45%;width:16px;height:16px;border-radius:50%;background:var(--gold);border:2px solid #fff;pointer-events:none;animation:fly .9s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--x),var(--y)) scale(.4);opacity:0}}
+.note{font-size:12.5px;color:var(--muted);text-align:center;margin:14px 0 6px}
+.link{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:13px;display:block;margin:0 auto;padding:8px}
+/* Opening splash */
+#splash{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;background:linear-gradient(160deg,#d6336c,#f08c2e);overflow:hidden;transition:opacity .45s,transform .45s;text-align:center;padding:24px}
+#splash.out{opacity:0;transform:scale(1.08);pointer-events:none}
+.sp-name{font:700 clamp(48px,15vw,72px)/1 var(--display);display:flex;text-shadow:0 4px 0 rgba(0,0,0,.12)}
+.sp-name span{display:inline-block;animation:pop .6s cubic-bezier(.3,1.6,.5,1) var(--d) both}
+.sp-name b{display:inline-block;animation:bob 1.4s ease-in-out calc(var(--d) + .7s) infinite}
+@keyframes pop{from{opacity:0;transform:translateY(40px) scale(.3) rotate(-20deg)}}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.sp-line{display:flex;align-items:center;gap:8px;font:600 22px/1.3 var(--body);animation:up .6s .9s both}
+.sp-line svg{flex:none;fill:#fff;animation:beat 1s ease-in-out 1.4s infinite}
+@keyframes beat{0%,100%{transform:scale(1)}30%{transform:scale(1.3)}}
+.sp-hearts i{position:absolute;bottom:-40px;opacity:.35;animation:floatup 3.2s linear infinite}
+.sp-hearts svg{width:var(--s);height:var(--s);fill:#fff;stroke:none}
+@keyframes floatup{to{transform:translateY(-110vh) rotate(25deg);opacity:0}}
+.sp-dots{display:flex;gap:8px;margin-top:10px}
+.sp-dots i{width:10px;height:10px;border-radius:50%;background:#fff;animation:bob .8s ease-in-out infinite}
+.sp-dots i:nth-child(2){animation-delay:.15s}.sp-dots i:nth-child(3){animation-delay:.3s}
+.veil.still,.veil.still .sheet{animation:none}
+/* Larger text pass */
+body{font-size:18px}h2{font-size:20px}.seg button,.btn,#toast,.coin,.hero small{font-size:16px}.chips span,.grow small,.muted,.link{font-size:15px}.pill,.note{font-size:14px}.bub small{font-size:13px}nav button{font-size:13.5px}.users .btn{font-size:18px}.btn{min-height:44px}
+/* Notice board */
+.post img{width:100%;border-radius:14px;margin:8px 0;display:block}
+.quote{font-weight:600;font-size:20px;line-height:1.4;margin:8px 0}
+.love{display:flex;align-items:center;gap:4px;color:var(--pink);font-weight:600;margin:6px 0 10px}
+.love svg{fill:currentColor}
+#cv{width:100%;border:1px solid var(--line);border-radius:14px;touch-action:none;background:#fff;display:block}
+.cols{display:flex;gap:10px;margin:10px 0;align-items:center}
+.cols button:not(.btn){width:36px;height:36px;border-radius:50%;border:3px solid var(--panel);box-shadow:0 0 0 1px var(--line)}
+.cols button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
+.prev{width:72px;height:54px;object-fit:cover;border-radius:10px}
+button.card{width:100%;text-align:left;font:inherit;color:inherit}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<div class="app">
+  <div class="top">
+    <div class="brand"><h1>Sayurika</h1><div class="seg" id="lang"></div></div>
+    <div id="role"></div>
+  </div>
+  <div id="view"></div>
+  <p class="note" id="note"></p>
+  <button class="link" data-a="reset" id="reset"></button>
+</div>
+<nav id="nav"></nav>
+<div id="sheet"></div>
+<div id="toast" role="status"></div>
+<div id="splash"></div>
+<script>
+const I={home:"M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",gift:"M4 11h16v10H4zM2 7h20v4H2zM12 7v14M12 7c-2-4-7-3-5 0M12 7c2-4 7-3 5 0",chat:"M4 5h16v11H9l-5 4z",pin:"M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",check:"M5 12l5 5 9-10",users:"M8 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 11a3 3 0 1 0 0-6M17 14c2.8.3 5 2.6 5 6",book:"M5 4h14v16H7a2 2 0 0 1-2-2zM9 8h6M9 12h6",pencil:"M4 20l1-5L16 4l4 4L9 19z",bed:"M3 18V7M3 14h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5",heart:"M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z",cam:"M4 8h3l2-3h6l2 3h3v11H4zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z",flame:"M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z",plus:"M12 5v14M5 12h14",star:"M12 3l2.7 5.6 6.1.8-4.5 4.3 1.1 6.1L12 16.9 6.6 19.8l1.1-6.1L3.2 9.4l6.1-.8z",video:"M3 7h12v10H3zM15 10l6-3v10l-6-3z",cash:"M3 7h18v10H3zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z",school:"M2 9l10-5 10 5-10 5zM6 11.5V17c3 2.5 9 2.5 12 0v-5.5",x:"M6 6l12 12M18 6L6 18"};
+const ic=(n,s)=>`<svg viewBox="0 0 24 24" width="${s||22}" height="${s||22}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${I[n]}"/></svg>`;
+const T={girls:["Girls","छोरी","こども"],dad:["Dad","बुबा","パパ"],home:["Tasks","काम","タスク"],shop:["Rewards","पुरस्कार","ごほうび"],msg:["Messages","सन्देश","メッセージ"],me:["Me","म","わたし"],appr:["Approve","स्वीकृति","承認"],kids:["Girls","छोरीहरू","こども"],
+hello:["Hello","नमस्ते","こんにちは"],coins:["coins","coin","コイン"],streak:["day streak","दिन लगातार","日連続"],level:["Level","Level","レベル"],today:["Today's tasks","आजका कामहरू","今日のタスク"],
+done:["Done","सकियो","できた"],wait:["Waiting for approval","स्वीकृति पर्खँदै","確認待ち"],ok:["Approved","स्वीकृत","承認済み"],redo:["Do again","फेरि गर","もう一度"],
+proof:["Add a photo as proof","Proof को लागि photo राख","しょうこの写真をとろう"],snap:["Tap to take photo","Photo खिच्न थिच","タップして写真をとる"],snapped:["Photo added","Photo थपियो","写真OK"],send:["Send to Dad and Mum","बुबा र आमालाई पठाऊ","パパとママに送る"],sent:["Sent!","पठाइयो!","送りました!"],
+get:["Get","लिने","もらう"],goal:["My goal","मेरो लक्ष्य","もくひょう"],got:["You got it!","तिमीले पायौ!","ゲット!"],mine:["My rewards","मेरा पुरस्कार","もらったごほうび"],given:["Given","दिइयो","受け取り済み"],soon:["Coming soon","छिट्टै पाइन्छ","もうすぐもらえるよ"],markGiven:["Mark given","दिइयो","わたした"],
+none:["Nothing here yet","अहिले केही छैन","まだありません"],where:["Where am I?","म कहाँ छु?","いまどこ?"],told:["Dad and Mum can see:","बुबा र आमालाई खबर गयो:","パパとママに伝えました:"],
+toApprove:["Waiting for your approval","तपाईंको स्वीकृति पर्खँदै","承認待ち"],approve:["Approve","स्वीकृत","承認"],reject:["Ask to redo","फेरि गर्न भन्ने","やり直し"],clear:["All caught up","सबै हेरिसकियो","すべて確認済み"],photo:["Photo proof attached","Photo proof छ","写真あり"],
+last:["Last check-in","पछिल्लो check-in","最後のチェックイン"],noCheck:["No check-in yet","अझै check-in छैन","まだありません"],week:["Tasks done this week","यो हप्ता सकिएका काम","今週のタスク"],bonus:["Bonus +5","Bonus +5","ボーナス +5"],
+addTask:["Add a task","नयाँ काम थप्ने","タスクを追加"],taskName:["Task name","कामको नाम","タスク名"],add:["Add","थप्ने","追加"],added:["Task added for both girls","दुवै छोरीलाई काम थपियो","タスクを追加しました"],claims:["Rewards to give","दिनुपर्ने पुरस्कार","わたすごほうび"],list:["Reward shop","Reward shop","ごほうびリスト"],
+write:["Write a message","सन्देश लेख्नुहोस्","メッセージを書く"],sendBtn:["Send","पठाउने","送信"],np:["Nepal","नेपाल","ネパール"],jp:["Japan","जापान","日本"],reset:["Reset demo","Demo reset गर्ने","デモをリセット"],
+board:["Board","बोर्ड","ボード"],boardT:["Notice board","Notice board","けいじばん"],newPost:["Post something for the girls","छोरीहरूका लागि केही post गर्नुहोस्","こどもたちに投稿する"],thought:["Thought of the day","आजको विचार","今日のことば"],photoDay:["Photo of the day","आजको photo","今日の写真"],drawing:["Drawing","चित्र","おえかき"],draw:["Draw","चित्र बनाउने","絵をかく"],addPhoto:["Photo","Photo","写真"],love:["Lots of love","धेरै धेरै माया","だいすきだよ"],post:["Post","Post गर्ने","投稿する"],posted:["Posted to the board","Board मा post भयो","投稿しました"],clearB:["Clear","मेट्ने","けす"],useDraw:["Use this drawing","यो चित्र राख्ने","この絵をつかう"],writeT:["Write a thought or note...","विचार वा सन्देश लेख्नुहोस्...","ことばを書く..."],idea:["Suggest","सुझाव","おすすめ"],
+dlove:["Daddy loves you","बुबाले तिमीलाई धेरै माया गर्नुहुन्छ","パパはきみがだいすきだよ"],mum:["Mum","आमा","ママ"],who:["Who is using the app?","App कसले चलाउँदै हुनुहुन्छ?","だれが使いますか?"],pin:["Enter PIN","PIN हाल्नुहोस्","PINを入力"],bad:["Wrong PIN","PIN मिलेन","PINがちがいます"],out:["Log out","Log out","ログアウト"],parent:["Parent","अभिभावक","保護者"],child:["Daughter","छोरी","むすめ"],
+demo:["Demo with sample data. Log out and log in as another person to see their side.","Sample data भएको demo हो। Log out गरेर अर्को व्यक्तिको रूपमा login गर्दा उनको side देखिन्छ।","サンプルデータのデモです。ログアウトして別の人でログインすると、その人の画面が見られます。"]};
+const USERS=[{id:"k0",kid:0,pin:"1111"},{id:"k1",kid:1,pin:"2222"},{id:"d",pin:"1234"},{id:"m",pin:"5678"}];
+const KIDS=[["Sayurika","सयुरिका","サユリカ"],["Gopeeka","गोपिका","ゴピカ"]];
+const SHOP=[[["Video call with Dad","बुबासँग video call","パパとビデオ通話"],15,"video"],[["Chocolate","चकलेट","チョコレート"],20,"gift"],[["Rs 100 cash","रु १०० नगद","100ルピー"],50,"cash"],[["New story book","नयाँ कथाको किताब","新しい絵本"],80,"book"]];
+const PLACES=[[["Home","घर","いえ"],"home"],[["School","स्कुल","がっこう"],"school"],[["Tuition","ट्युसन","じゅく"],"pencil"]];
+const QD=[["Good morning! Study well today.","शुभ प्रभात! आज राम्रोसँग पढ।","おはよう!今日も勉強がんばってね。"],["I am proud of you.","मलाई तिमीमा गर्व छ।","えらいね、パパはうれしいよ。"],["Call me after homework.","गृहकार्य सकेपछि call गर।","宿題が終わったら電話してね。"]];
+const QK=[["Okay Dad!","हुन्छ बुबा!","うん、パパ!"],["I miss you.","तपाईंको याद आयो।","パパに会いたい。"],["I finished everything!","मैले सबै सकेँ!","ぜんぶ終わったよ!"]];
+const WEEK=[[3,4,2,4,3,1],[2,3,3,1,4,2]];
+// st per kid per task: 0 open, 1 waiting, 2 approved, 3 do again
+const THOUGHTS=[["Small steps every day make big dreams come true.","हरेक दिनको सानो मेहनतले ठूलो सपना पूरा हुन्छ।","毎日の小さな一歩が、大きな夢をかなえるよ。"],["Be kind, work hard, and smile.","दयालु बन, मेहनत गर, र मुस्कुराऊ।","やさしく、がんばって、えがおでね。"],["Far away, but always with you.","टाढा भए पनि म सधैं तिमीसँगै छु।","はなれていても、いつもいっしょだよ。"]];
+const COLS=["#1c2a4a","#d6336c","#e89b0c","#1f8a5b","#3b5bdb"];
+const DEF=()=>({L:1,posts:[{by:"d",q:2,love:1,tm:"07:00",h:[0,0]},{by:"m",q:1,tm:"06:40",h:[1,0]}],user:null,who:"d",by:[["d",null,null,null],[null,null,"m",null]],role:"kid",kid:0,tab:{kid:"home",dad:"appr"},coins:[22,8],earned:[82,38],streak:[4,2],
+ tasks:[[["Homework","गृहकार्य","しゅくだい"],10,"pencil"],[["Read 20 minutes","२० मिनेट पढ्ने","20分読書"],5,"book"],[["Make the bed","ओछ्यान मिलाउने","ベッドを整える"],3,"bed"],[["Help Mum","आमालाई सघाउने","ママのお手伝い"],5,"heart"]],
+ st:[[2,1,0,0],[0,0,2,0]],loc:[[1,"10:05"],null],claims:[],goal:[2,1],msgs:[{f:"d",k:0,q:0,tm:"07:30"},{f:"d",k:1,q:0,tm:"07:30"}]});
+let S=DEF(),sheet=null,pin=null,shown={},drawOpen=false,pen=COLS[0],ti=0,draft={x:"",img:null,kind:null,love:false};
+try{const o=JSON.parse(localStorage.getItem("sayurika4"));if(o&&o.tasks)S=o}catch(e){}
+const $=id=>document.getElementById(id),t=k=>T[k][S.L],x=a=>a[S.L],esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clock=z=>{try{return new Date().toLocaleTimeString("en-GB",{timeZone:z,hour:"2-digit",minute:"2-digit"})}catch(e){return "--:--"}},now=()=>clock("Asia/Kathmandu");
+const kidSeg=()=>S.role=="kid"?"":`<div class="seg" style="width:max-content;margin-bottom:12px">${KIDS.map((n,i)=>`<button data-a="kid" data-v="${i}" aria-pressed="${i==S.kid}">${x(n)}</button>`).join("")}</div>`;
+const mtext=m=>m.q!=null?x((m.f=="k"?QK:QD)[m.q]):esc(m.x);
+const who=m=>m.f=="d"?t("dad"):m.f=="m"?t("mum"):x(KIDS[m.k]);
+const uname=u=>u.kid!=null?x(KIDS[u.kid]):t(u.id=="m"?"mum":"dad");
+const login=()=>`<div class="card"><h2>${t("who")}</h2><div class="users">${USERS.map(u=>`<button class="btn ghost" data-a="user" data-v="${u.id}"><span class="ico">${ic(u.kid!=null?"users":"heart",24)}</span><b>${uname(u)}</b><small class="muted">${t(u.kid!=null?"child":"parent")} · PIN ${u.pin}</small></button>`).join("")}</div></div>`;
+const pinSheet=()=>{if(!pin)return "";const u=USERS.find(u=>u.id==pin.id);return `<div class="veil" data-a="close"><div class="sheet" data-a="stay"><h2>${uname(u)}</h2><span class="muted">${t("pin")} · Demo PIN ${u.pin}</span><div class="dots">${[0,1,2,3].map(i=>`<i class="${i<pin.v.length?"on":""}"></i>`).join("")}</div><div class="keys">${[1,2,3,4,5,6,7,8,9,"",0,"x"].map(n=>n===""?"<span></span>":`<button class="btn ghost" data-a="key" data-v="${n}" aria-label="${n=="x"?"Delete":n}">${n=="x"?ic("x",20):n}</button>`).join("")}</div></div></div>`};
+const thread=me=>{const a=S.msgs.filter(m=>m.k==S.kid);return `<div class="thread">${a.length?a.map(m=>`<div class="bub ${m.f==me?"me":""}">${mtext(m)}<small>${who(m)} · ${m.tm}</small></div>`).join(""):`<p class="muted">${t("none")}</p>`}</div>`};
+const quick=(arr,a)=>`<div class="quick">${arr.map((q,i)=>`<button class="btn ghost" data-a="${a}" data-v="${i}">${x(q)}</button>`).join("")}</div>`;
+const bar=(v,m)=>`<div class="bar"><i style="width:${Math.min(100,Math.round(v/m*100))}%"></i></div>`;
+const ptext=p=>p.q!=null?x(THOUGHTS[p.q]):esc(p.x||"");
+const kindKey=p=>p.kind=="photo"?"photoDay":p.kind=="draw"?"drawing":ptext(p)?"thought":"love";
+const postCard=(p,i)=>{const d=S.role=="dad",n=p.h[0]+p.h[1],tx=ptext(p);return `<div class="card post"><div class="row" style="padding-top:0"><span class="ico">${ic(p.kind=="draw"?"pencil":p.kind=="photo"?"cam":"star")}</span><span class="grow"><b>${t(kindKey(p))}</b><small>${t(p.by=="m"?"mum":"dad")} · ${p.tm}</small></span>${d?`<button class="btn ghost sq" data-a="delpost" data-v="${i}" aria-label="Delete">${ic("x",18)}</button>`:""}</div>${p.img?`<img src="${p.img}" alt="${t(kindKey(p))}">`:""}${tx?`<p class="quote">${tx}</p>`:""}${p.love?`<div class="love">${ic("heart",20)}${ic("heart",20)}${ic("heart",20)} ${t("love")}</div>`:""}${d?`<small class="muted">${ic("heart",14)} ${n?KIDS.filter((_,j)=>p.h[j]).map(a=>x(a)).join(", "):"0"}</small>`:`<button class="btn ${p.h[S.kid]?"pk":"ghost"}" data-a="heart" data-v="${i}" aria-pressed="${!!p.h[S.kid]}">${ic("heart",18)} ${n}</button>`}</div>`};
+const composer=()=>`<div class="card"><h2>${t("newPost")}</h2><div class="form" style="margin-top:0"><input id="bx" maxlength="140" value="${esc(draft.x)}" placeholder="${t("writeT")}" aria-label="${t("thought")}"><button class="btn ghost" data-a="idea">${ic("star",18)}${t("idea")}</button></div><div class="acts" style="margin-top:8px"><button class="btn ghost" data-a="opendraw">${ic("pencil",18)}${t("draw")}</button><label class="btn ghost">${ic("cam",18)}${t("addPhoto")}<input id="pf" type="file" accept="image/*" hidden></label><button class="btn ${draft.love?"pk":"ghost"}" data-a="lovet" aria-pressed="${draft.love}">${ic("heart",18)}${t("love")}</button></div>${draft.img?`<div class="row"><img class="prev" src="${draft.img}" alt=""><span class="grow muted">${t(draft.kind=="draw"?"drawing":"photoDay")}</span><button class="btn ghost sq" data-a="dropimg" aria-label="Remove">${ic("x",18)}</button></div>`:""}<button class="btn pk wide" style="margin-top:10px" data-a="post">${t("post")}</button></div>`;
+const teaser=()=>{const p=S.posts[0];return p?`<button class="card row" style="border-top:1px solid var(--line)" data-a="tab" data-v="board"><span class="ico">${ic("star")}</span><span class="grow"><b>${t("boardT")}</b><small>${ptext(p)||t(kindKey(p))}</small></span></button>`:""};
+const drawSheet=()=>`<div class="veil" data-a="close"><div class="sheet" data-a="stay"><h2>${t("drawing")}</h2><canvas id="cv" width="600" height="420"></canvas><div class="cols">${COLS.map((c,i)=>`<button data-a="col" data-v="${c}" aria-pressed="${c==pen}" aria-label="Colour ${i+1}" style="background:${c}"></button>`).join("")}<button class="btn ghost" style="margin-left:auto" data-a="wipe">${t("clearB")}</button></div><button class="btn pk wide" data-a="usedraw">${t("useDraw")}</button></div></div>`;
+function initDraw(){const c=$("cv"),g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.lineWidth=7;g.lineCap=g.lineJoin="round";let on=false;
+ const pos=e=>{const r=c.getBoundingClientRect(),p=e.touches?e.touches[0]:e;return[(p.clientX-r.left)*c.width/r.width,(p.clientY-r.top)*c.height/r.height]};
+ const dn=e=>{e.preventDefault();on=true;const p=pos(e);g.strokeStyle=pen;g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(p[0]+.1,p[1]+.1);g.stroke()},mv=e=>{if(!on)return;e.preventDefault();const p=pos(e);g.lineTo(p[0],p[1]);g.stroke()},up=()=>{on=false};
+ if(window.PointerEvent){c.onpointerdown=dn;c.onpointermove=mv;c.onpointerup=c.onpointerleave=up}else{c.ontouchstart=dn;c.ontouchmove=mv;c.ontouchend=up;c.onmousedown=dn;c.onmousemove=mv;c.onmouseup=up}}
+const V={
+board(){return (S.role=="dad"?composer():"")+(S.posts.length?S.posts.map(postCard).join(""):`<div class="card muted">${t("none")}</div>`)},
+home(){const k=S.kid,lv=Math.floor(S.earned[k]/30)+1,m=S.msgs.filter(m=>m.k==k&&m.f!="k").pop();
+ return kidSeg()+`<div class="hero"><small>${t("hello")}, ${x(KIDS[k])}</small><div class="big"><span data-count="${S.coins[k]}"></span> <em>${t("coins")}</em></div><div class="chips"><span>${ic("flame",15)}${S.streak[k]} ${t("streak")}</span><span>${ic("star",15)}${t("level")} ${lv}</span></div>${bar(S.earned[k]%30,30)}</div>`+
+ (m?`<div class="card row" style="border-top:1px solid var(--line)"><span class="ico">${ic("chat")}</span><span class="grow">${mtext(m)}<small>${who(m)} · ${m.tm}</small></span></div>`:"")+
+ teaser()+`<div class="card"><h2>${t("today")}</h2>${S.tasks.map(([n,c,i],j)=>{const s=S.st[k][j];return `<div class="row"><span class="ico">${ic(i)}</span><span class="grow">${esc(x(n))}<small class="coin">+${c} ${t("coins")}${s==2&&S.by[k][j]?" · "+t(S.by[k][j]=="m"?"mum":"dad"):""}</small></span>${s==1?`<span class="pill">${t("wait")}</span>`:s==2?`<span class="pill ok">${t("ok")}</span>`:`<button class="btn ${s==3?"no":""}" data-a="done" data-v="${j}">${s==3?t("redo"):t("done")}</button>`}</div>`}).join("")}</div>`},
+shop(){const k=S.kid,g=S.goal[k],mine=S.claims.filter(c=>c.k==k);
+ if(S.role=="dad"){return `<div class="card"><h2>${t("claims")}</h2>${S.claims.length?S.claims.map((c,i)=>`<div class="row"><span class="ico">${ic(SHOP[c.i][2])}</span><span class="grow">${x(SHOP[c.i][0])}<small>${x(KIDS[c.k])} · ${c.tm}</small></span>${c.g?`<span class="pill ok">${t("given")}</span>`:`<button class="btn" data-a="given" data-v="${i}">${t("markGiven")}</button>`}</div>`).join(""):`<p class="muted">${t("none")}</p>`}</div><div class="card"><h2>${t("list")}</h2>${SHOP.map(([n,c,i])=>`<div class="row"><span class="ico">${ic(i)}</span><span class="grow">${x(n)}</span><span class="coin">${c} ${t("coins")}</span></div>`).join("")}</div>`}
+ return kidSeg()+`<div class="hero"><small>${t("goal")}</small><div style="font:700 22px/1.3 var(--display)">${x(SHOP[g][0])}</div><div class="chips"><span><b data-count="${S.coins[k]}"></b>&nbsp;/ ${SHOP[g][1]} ${t("coins")}</span></div>${bar(S.coins[k],SHOP[g][1])}</div>`+
+ `<div class="card"><h2>${t("shop")}</h2>${SHOP.map(([n,c,i],j)=>`<div class="row"><span class="ico">${ic(i)}</span><span class="grow">${x(n)}<small class="coin">${c} ${t("coins")}</small>${bar(S.coins[k],c)}</span><button class="btn ghost sq" data-a="goal" data-v="${j}" aria-label="${t("goal")}" aria-pressed="${g==j}" style="${g==j?"color:var(--gold);border-color:var(--gold)":""}">${ic("star",18)}</button><button class="btn" data-a="buy" data-v="${j}" ${S.coins[k]<c?"disabled":""}>${t("get")}</button></div>`).join("")}</div>`+
+ `<div class="card"><h2>${t("mine")}</h2>${mine.length?mine.map(c=>`<div class="row"><span class="grow">${x(SHOP[c.i][0])}<small>${c.tm}</small></span><span class="pill ${c.g?"ok":""}">${c.g?t("given"):t("soon")}</span></div>`).join(""):`<p class="muted">${t("none")}</p>`}</div>`},
+msg(){const d=S.role=="dad";return kidSeg()+thread(d?S.who:"k")+`<div class="card">${quick(d?QD:QK,"q")}${d?`<div class="form"><input id="mi" maxlength="120" placeholder="${t("write")}" aria-label="${t("write")}"><button class="btn pk" data-a="say">${t("sendBtn")}</button></div>`:""}</div>`},
+me(){const k=S.kid,l=S.loc[k],lv=Math.floor(S.earned[k]/30)+1;
+ return kidSeg()+`<div class="card"><h2>${t("where")}</h2><div class="places">${PLACES.map(([n,i],j)=>`<button class="btn ${l&&l[0]==j?"pk":"ghost"}" data-a="loc" data-v="${j}">${ic(i,26)}${x(n)}</button>`).join("")}</div><p class="muted" style="margin:8px 0 0">${l?t("last")+": "+x(PLACES[l[0]][0])+" · "+l[1]:t("noCheck")}</p></div>`+
+ `<div class="card"><h2>${ic("star",18)} ${t("level")} ${lv}</h2>${bar(S.earned[k]%30,30)}<p class="muted" style="margin:6px 0 0">${S.earned[k]%30} / 30 · ${ic("flame",14)} ${S.streak[k]} ${t("streak")}</p></div>`},
+appr(){const p=pend();
+ return `<div class="hero d"><small>${t("toApprove")}</small><div class="big">${p.length}</div><div class="clocks"><div><small>${t("jp")}</small><b data-z="Asia/Tokyo">${clock("Asia/Tokyo")}</b></div><div><small>${t("np")}</small><b data-z="Asia/Kathmandu">${now()}</b></div></div></div>`+
+ (p.length?p.map(([k,i])=>`<div class="card"><div class="row"><span class="thumb">${ic("cam",24)}</span><span class="grow"><b>${esc(x(S.tasks[i][0]))}</b><small>${x(KIDS[k])} · ${t("photo")}</small><span class="coin">+${S.tasks[i][1]} ${t("coins")}</span></span></div><div class="acts"><button class="btn" style="flex:2" data-a="ok" data-v="${k},${i}">${ic("check",18)}${t("approve")}</button><button class="btn no" style="flex:1" data-a="no" data-v="${k},${i}">${t("reject")}</button></div></div>`).join(""):`<div class="card" style="text-align:center;color:var(--ok)">${ic("check",34)}<div>${t("clear")}</div></div>`)},
+kids(){return KIDS.map((n,k)=>{const l=S.loc[k],w=WEEK[k].concat(S.st[k].filter(s=>s==2).length);
+ return `<div class="card"><div class="row"><span class="ico">${ic("users")}</span><span class="grow"><b>${x(n)}</b><small>${ic("pin",13)} ${l?x(PLACES[l[0]][0])+" · "+l[1]:t("noCheck")}</small></span><span style="text-align:right"><span class="coin" style="font-size:20px">${S.coins[k]}</span><small class="muted">${t("coins")}</small></span></div><small class="muted">${t("week")} · ${ic("flame",13)} ${S.streak[k]} ${t("streak")}</small><div class="bars">${w.map(v=>`<i style="height:${v/5*100}%"></i>`).join("")}</div><button class="btn ghost wide" style="margin-top:10px" data-a="bonus" data-v="${k}">${ic("plus",16)}${t("bonus")}</button></div>`}).join("")+
+ `<div class="card"><h2>${t("addTask")}</h2><div class="form"><input id="tn" maxlength="30" placeholder="${t("taskName")}" aria-label="${t("taskName")}"><input id="tc" class="n" type="number" min="1" max="50" value="5" aria-label="${t("coins")}"><button class="btn" data-a="addtask">${t("add")}</button></div></div>`}};
+const pend=()=>{const p=[];S.st.forEach((a,k)=>a.forEach((s,i)=>s==1&&p.push([k,i])));return p};
+function render(nav){
+ const kid=S.role=="kid",tab=S.tab[S.role];
+ $("lang").innerHTML=["EN","ने","日本"].map((l,i)=>`<button data-a="lang" data-v="${i}" aria-pressed="${i==S.L}">${l}</button>`).join("");
+ const u=USERS.find(u=>u.id==S.user);
+ $("role").innerHTML=u?`<div class="who"><b>${uname(u)}</b><button class="btn ghost" data-a="out">${t("out")}</button></div>`:"";
+ $("nav").style.display=$("reset").style.display=u?"":"none";
+ if(!u){$("view").innerHTML=login();$("note").textContent="";$("sheet").innerHTML=pinSheet();still();return}
+ const tabs=kid?[["home","home"],["board","star"],["shop","gift"],["msg","chat"],["me","pin"]]:[["appr","check"],["board","star"],["kids","users"],["shop","gift"],["msg","chat"]],n=pend().length;
+ $("nav").innerHTML=tabs.map(([k,i])=>`<button data-a="tab" data-v="${k}" aria-pressed="${k==tab}">${ic(i)}${t(k)}${k=="appr"&&n?`<b>${n}</b>`:""}</button>`).join("");
+ const v=$("view");v.innerHTML=V[tab]();
+ if(nav){v.classList.remove("in");void v.offsetWidth;v.classList.add("in");window.scrollTo(0,0)}
+ v.querySelectorAll("[data-count]").forEach(el=>{const to=+el.dataset.count,key=S.kid,from=shown[key]==null||nav?to:shown[key];shown[key]=to;if(from==to){el.textContent=to;return}
+  let s=null;const step=ts=>{s=s||ts;const p=Math.min(1,(ts-s)/500);el.textContent=Math.round(from+(to-from)*p);p<1&&requestAnimationFrame(step)};requestAnimationFrame(step)});
+ $("note").textContent=t("demo");$("reset").textContent=t("reset");
+ if(drawOpen){$("sheet").innerHTML=drawSheet();initDraw()}else $("sheet").innerHTML=sheet?`<div class="veil" data-a="close"><div class="sheet" data-a="stay"><h2>${esc(x(S.tasks[sheet.i][0]))}</h2><span class="muted">${t("proof")}</span><button class="shot ${sheet.p?"on":""}" data-a="snap"><span>${ic(sheet.p?"check":"cam",34)}<br>${sheet.p?t("snapped"):t("snap")}</span></button><button class="btn pk wide" data-a="send">${t("send")}</button></div></div>`:"";
+ try{localStorage.setItem("sayurika4",JSON.stringify(S))}catch(e){}
+ still();
+}
+// replay the sheet's slide-up only when it first opens, not on every tap inside it
+let lastK="";const still=()=>{const v=$("sheet").firstElementChild,k=v?(drawOpen?"d":pin?"p":"s"):"";if(v&&k==lastK)v.classList.add("still");lastK=k};
+let tt;function toast(m){const e=$("toast");e.textContent=m;e.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>e.classList.remove("on"),1900)}
+function burst(){for(let i=0;i<10;i++){const c=document.createElement("i");c.className="fly";c.style.setProperty("--x",(Math.random()*240-120)+"px");c.style.setProperty("--y",(-80-Math.random()*160)+"px");document.body.appendChild(c);setTimeout(()=>c.remove(),900)}}
+const say=(f,q,xv)=>S.msgs.push({f:f,k:S.kid,q:q,x:xv,tm:now()});
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,v=b.dataset.v,k=S.kid;let nav=false;const bx=$("bx");if(bx)draft.x=bx.value;
+ if(a=="stay")return;
+ if(a=="lang")S.L=+v;
+ else if(a=="user")pin={id:v,v:""};
+ else if(a=="key"){if(v=="x")pin.v=pin.v.slice(0,-1);else pin.v+=v;
+  if(pin.v.length==4){const u=USERS.find(u=>u.id==pin.id);if(pin.v==u.pin){S.user=u.id;if(u.kid!=null){S.role="kid";S.kid=u.kid}else{S.role="dad";S.who=u.id}pin=null;nav=true}else{pin.v="";toast(t("bad"))}}}
+ else if(a=="out"){S.user=null;try{localStorage.setItem("sayurika4",JSON.stringify(S))}catch(e){}nav=true}
+ else if(a=="kid"){S.kid=+v;nav=true}
+ else if(a=="tab"){S.tab[S.role]=v;nav=true}
+ else if(a=="done")sheet={i:+v,p:false};
+ else if(a=="close"){sheet=pin=null;drawOpen=false}
+ else if(a=="opendraw"){pen=COLS[0];drawOpen=true}
+ else if(a=="col"){pen=v;document.querySelectorAll("[data-a=col]").forEach(c=>c.setAttribute("aria-pressed",c.dataset.v==v));return}
+ else if(a=="wipe"){const c=$("cv"),g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);return}
+ else if(a=="usedraw"){draft.img=$("cv").toDataURL("image/jpeg",.85);draft.kind="draw";drawOpen=false}
+ else if(a=="lovet")draft.love=!draft.love;
+ else if(a=="idea")draft.x=x(THOUGHTS[ti++%3]);
+ else if(a=="dropimg"){draft.img=null;draft.kind=null}
+ else if(a=="post"){const s=draft.x.trim();if(!s&&!draft.img&&!draft.love)return;S.posts.unshift({by:S.who,x:s,img:draft.img,kind:draft.kind,love:draft.love?1:0,tm:now(),h:[0,0]});draft={x:"",img:null,kind:null,love:false};toast(t("posted"))}
+ else if(a=="heart"){const p=S.posts[+v];p.h[k]=p.h[k]?0:1;if(p.h[k])burst()}
+ else if(a=="delpost")S.posts.splice(+v,1);
+ else if(a=="snap")sheet.p=true;
+ else if(a=="send"){S.st[k][sheet.i]=1;sheet=null;toast(t("sent"))}
+ else if(a=="buy"){const c=SHOP[+v][1];if(S.coins[k]>=c){S.coins[k]-=c;S.claims.unshift({k:k,i:+v,tm:now(),g:0});toast(t("got"));burst()}}
+ else if(a=="goal")S.goal[k]=+v;
+ else if(a=="loc"){S.loc[k]=[+v,now()];toast(t("told")+" "+x(PLACES[+v][0]))}
+ else if(a=="ok"||a=="no"){const p=v.split(",").map(Number),c=S.tasks[p[1]][1];if(a=="ok"){S.st[p[0]][p[1]]=2;S.by[p[0]][p[1]]=S.who;S.coins[p[0]]+=c;S.earned[p[0]]+=c;toast(x(KIDS[p[0]])+" +"+c+" "+t("coins"));burst()}else S.st[p[0]][p[1]]=3}
+ else if(a=="bonus"){S.coins[+v]+=5;S.earned[+v]+=5;toast(x(KIDS[+v])+" +5 "+t("coins"));burst()}
+ else if(a=="given")S.claims[+v].g=1;
+ else if(a=="q"){say(S.role=="dad"?S.who:"k",+v);toast(t("sendBtn")+" ✓")}
+ else if(a=="say"){const s=$("mi").value.trim();if(!s)return;say(S.who,null,s)}
+ else if(a=="addtask"){const s=$("tn").value.trim(),c=Math.max(1,Math.min(50,+$("tc").value||5));if(!s)return;S.tasks.push([[s,s,s],c,"star"]);S.st.forEach(r=>r.push(0));S.by.forEach(r=>r.push(null));toast(t("added"))}
+ else if(a=="reset"){S=DEF();shown={};nav=true}
+ else return;
+ render(nav);
+});
+document.addEventListener("change",e=>{if(e.target.id!="pf")return;const f=e.target.files[0];if(!f)return;const im=new Image();
+ im.onload=()=>{const s=Math.min(1,640/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);const bx=$("bx");if(bx)draft.x=bx.value;draft.img=c.toDataURL("image/jpeg",.75);draft.kind="photo";URL.revokeObjectURL(im.src);render()};im.src=URL.createObjectURL(f)});
+setInterval(()=>document.querySelectorAll("[data-z]").forEach(e=>e.textContent=clock(e.dataset.z)),20000);
+render(true);
+(function(){const s=$("splash");s.innerHTML=`<div class="sp-hearts">${[0,1,2,3,4,5,6,7,8,9].map(i=>`<i style="left:${4+i*10}%;animation-delay:${(i*37%10)/8}s;--s:${16+(i*7%5)*6}px">${ic("heart")}</i>`).join("")}</div><div class="sp-name">${"Sayurika".split("").map((c,i)=>`<span style="--d:${i*.09}s"><b>${c}</b></span>`).join("")}</div><div class="sp-line">${ic("heart",22)}<span>${x(T.dlove)}</span>${ic("heart",22)}</div><div class="sp-dots"><i></i><i></i><i></i></div>`;
+ const bye=()=>{s.classList.add("out");setTimeout(()=>s.remove(),450)},tm=setTimeout(bye,3200);s.onclick=()=>{clearTimeout(tm);bye()}})();
+</script>
+</html>
